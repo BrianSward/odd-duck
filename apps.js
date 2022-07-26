@@ -12,8 +12,8 @@ let imgContainer = document.getElementById('img-container');
 let imgOne = document.getElementById('img-one');
 let imgTwo = document.getElementById('img-two');
 let imgThree = document.getElementById('img-three');
-let resultsBtn = document.getElementById('show-results-btn');
-let resultsList = document.getElementById('results-list');
+// let resultsBtn = document.getElementById('show-results-btn');
+// let resultsList = document.getElementById('results-list');
 
 // constructor
 
@@ -32,14 +32,21 @@ function getRandomNumber() {
   return Math.floor(Math.random() * allThings.length);
 }
 
+let testInt1 = 0;
+let testInt2 = 0;
+let testInt3 = 0;
+
+
 function renderThings() {
   let imgOneIndex = getRandomNumber();
   let imgTwoIndex = getRandomNumber();
   let imgThreeIndex = getRandomNumber();
 
-  while (imgOneIndex === imgTwoIndex || imgOneIndex === imgThreeIndex || imgTwoIndex === imgThreeIndex) {
+
+  while ((imgOneIndex === imgTwoIndex || imgOneIndex === imgThreeIndex || imgTwoIndex === imgThreeIndex || imgOneIndex === testInt1 || imgOneIndex === testInt2 || imgOneIndex === testInt3 || imgTwoIndex === testInt1 || imgTwoIndex === testInt2 || imgTwoIndex === testInt3 || imgThreeIndex === testInt1 || imgThreeIndex === testInt2 || imgThreeIndex === testInt3) ) {
     imgTwoIndex = getRandomNumber();
     imgThreeIndex = getRandomNumber();
+    imgOneIndex = getRandomNumber();
   }
   imgOne.alt = allThings[imgOneIndex].name;
   imgOne.src = allThings[imgOneIndex].photo;
@@ -50,6 +57,9 @@ function renderThings() {
   imgThree.alt = allThings[imgThreeIndex].name;
   imgThree.src = allThings[imgThreeIndex].photo;
   allThings[imgOneIndex].views++;
+  testInt1 = imgOneIndex;
+  testInt2 = imgTwoIndex;
+  testInt3 = imgThreeIndex;
 }
 
 function handleClick(event) {
@@ -65,22 +75,23 @@ function handleClick(event) {
     }
   }
   if (totalVotes === 0) {
+    renderChart();
     imgContainer.removeEventListener('click', handleClick);
-    resultsBtn.addEventListener('click', shareResults);
-    resultsBtn.className = 'clicks-allowed';
-    imgContainer.className = 'no-voting';
+    // resultsBtn.addEventListener('click', shareResults);
+    // resultsBtn.className = 'clicks-allowed';
+    // imgContainer.className = 'no-voting';
   } else {
     renderThings();
   }
 }
 
-function shareResults(){
-  for (let i = 0; i < allThings.length; i++) {
-    let li = document.createElement('li');
-    li.textContent = `${allThings[i].name} had ${allThings[i].votes} votes and was seen ${allThings[i].views} times.`;
-    resultsList.appendChild(li);
-  }
-}
+// function shareResults(){
+//   for (let i = 0; i < allThings.length; i++) {
+//     let li = document.createElement('li');
+//     li.textContent = `${allThings[i].name} had ${allThings[i].votes} votes and was seen ${allThings[i].views} times.`;
+//     resultsList.appendChild(li);
+//   }
+
 
 new Thing('bag');
 new Thing('banana');
@@ -103,5 +114,61 @@ new Thing('water-can');
 new Thing('wine-glass');
 
 renderThings();
+
+let canvasElem = document.getElementById('my-chart');
+
+function renderChart(){
+
+  let thingNames = [];
+  let thingVotes = [];
+  let thingViews = [];
+  let thingColor = [];
+  let newStep = [];
+  // let newColor = []; this is all commented out as i was attempting something you cannot do but i like the spirit of where my mind took me
+  
+
+  for (let j =0; j <allThings.length; j++){
+    thingNames.push(allThings[j].name);
+    thingVotes.push(allThings[j].votes);
+    thingViews.push(allThings[j].views);
+    // used some of this guys code https://css-tricks.com/snippets/javascript/random-hex-color/
+    newStep = Math.floor(Math.random()*16777215).toString(16);
+    thingColor.push(`#${newStep}`);
+    // newColor.push(`#1A${newStep}`); //#1A......
+  }
+  // console.log(thingColor);
+  // console.log(newColor);
+
+  let myObj = {
+    type: 'bar',
+    data: {
+      labels: thingNames,
+      datasets: [{
+        label: '# of Votes',
+        data: thingVotes,
+        backgroundColor: thingColor,
+        borderColor: thingColor,
+        borderWidth: 1
+      },
+      {
+        label: '# of Views',
+        data: thingViews,
+        backgroundColor: thingColor,
+        borderColor: thingColor,
+        borderWidth: 1
+      }]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  };
+
+  new Chart(canvasElem, myObj);
+
+}
 
 imgContainer.addEventListener('click', handleClick);
